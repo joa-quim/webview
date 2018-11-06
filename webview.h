@@ -28,15 +28,54 @@
 extern "C" {
 #endif
 
+/*
+ * When an application links to a DLL in Windows, the symbols that
+ * are imported have to be identified as such.
+ */
+
+#ifndef EXTERN_MSC
+#	ifdef _WIN32
+#		ifdef LIBRARY_EXPORTS
+#			define LIBSPEC __declspec(dllimport)
+#		else
+#			define LIBSPEC __declspec(dllexport)
+#		endif
+#	else
+#		define LIBSPEC
+#	endif
+#	define EXTERN_MSC extern LIBSPEC
+#endif
+
+#if defined(_WIN32) && (_MSC_VER <= 1800) && !defined(inline)
+#	define inline _inline
+#endif
+#if defined(_WIN32) && (_MSC_VER <= 1800) && !defined(snprintf)
+#	define snprintf _snprintf
+#endif
+#if defined(_WIN32) && (_MSC_VER <= 1800) && !defined(vsnprintf)
+#	define vsnprintf _vsnprintf
+#endif
+
 #ifdef WEBVIEW_STATIC
 #define WEBVIEW_API static
 #else
-#define WEBVIEW_API extern
+#define WEBVIEW_API EXTERN_MSC
 #endif
 
-#include <stdint.h>
+#ifndef WEBVIEW_IMPLEMENTATION 
+#	define WEBVIEW_IMPLEMENTATION
+#endif
+#if defined(_WIN32) && !defined(WEBVIEW_WINAPI)
+#	define WEBVIEW_WINAPI
+#elif defined __APPLE__ && !defined(WEBVIEW_COCOA)
+#	define WEBVIEW_COCOA
+#elif !defined(WEBVIEW_GTK) && !defined(WEBVIEW_WINAPI)		/* Not particular safe this default to unix */
+#	define WEBVIEW_GTK
+#endif
+
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #if defined(WEBVIEW_GTK)
 #include <JavaScriptCore/JavaScript.h>

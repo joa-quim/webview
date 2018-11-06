@@ -167,7 +167,11 @@ static void test_inject_css() {
   assert(results[0] == "4px");
 }
 
+#ifdef _MSC_VER
+int WinMain(HINSTANCE, HINSTANCE, LPSTR, INT) {
+#else
 int main() {
+#endif
   test_minimal();
   test_window_size();
   test_inject_js();
